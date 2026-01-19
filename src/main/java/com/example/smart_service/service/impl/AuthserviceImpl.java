@@ -3,8 +3,9 @@ package com.example.smart_service.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import com.example.smart_service.dto.request.LoginRequest;
 import com.example.smart_service.dto.request.RegisterRequest;
 import com.example.smart_service.dto.response.AuthResponse;
 import com.example.smart_service.entity.RoleEntity;
@@ -13,7 +14,6 @@ import com.example.smart_service.repository.RoleRepository;
 import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.security.JwtUtil;
 import com.example.smart_service.service.Authservice;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,6 +22,7 @@ public class AuthserviceImpl implements Authservice {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -30,10 +31,11 @@ public class AuthserviceImpl implements Authservice {
                 || userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Username or email already exists");
         }
+
         UserEntity user = new UserEntity();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhone(request.getPhone());
         user.setPrifileImage(request.getPrifileImage());
         user.setStatus(request.getStatus());
@@ -52,6 +54,23 @@ public class AuthserviceImpl implements Authservice {
         return new AuthResponse(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(),
                 savedUser.getPassword(), savedUser.getPhone(), savedUser.getPrifileImage(),
                 savedUser.getStatus(), accessToken, refreshToken);
+    }
+
+    @Override
+    public AuthResponse login(LoginRequest request) {
+
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Wrong password");
+        }
+
+        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getRoles());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId(), user.getRoles());
+
+        return new AuthResponse(user.getId(), user.getUsername(), user.getEmail(),
+                user.getPassword(), user.getPhone(), user.getPrifileImage(),
+                user.getStatus(), accessToken, refreshToken);
     }
 
 }
