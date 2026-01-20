@@ -38,6 +38,9 @@ public void run(String... args) {
 
         
         userRepository.save(admin);
+        System.out.println(" Admin user created successfully");
+    }else {
+    System.out.println("Admin user already exists, skipping creation");
     }
   }
 }
