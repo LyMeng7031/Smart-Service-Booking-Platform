@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -27,9 +27,20 @@ public void run(String... args) {
         admin.setUsername("admin");
         admin.setEmail("admin@example.com");
         admin.setPassword(passwordEncoder.encode("admin123"));
+
+        RoleEntity adminRole = roleRepository.findByName("admin")
+                .orElseThrow(() -> {
+                    throw new RuntimeException("Admin role not found");
+                });
+        List<RoleEntity> roles = new ArrayList<>();
+        roles.add(adminRole);
+        admin.setRoles(roles);
+
         
-        // Assign roles...
         userRepository.save(admin);
+        System.out.println(" Admin user created successfully");
+    }else {
+    System.out.println("Admin user already exists, skipping creation");
     }
-}
+  }
 }
