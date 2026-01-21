@@ -10,7 +10,6 @@ import com.example.smart_service.dto.request.RegisterRequest;
 import com.example.smart_service.dto.response.AuthResponse;
 import com.example.smart_service.service.Authservice;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
