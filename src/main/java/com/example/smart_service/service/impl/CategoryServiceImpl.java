@@ -68,35 +68,35 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toList());
     }
 
-    // @Override
-    // public CategoryResponse getCategoryById(Long id) {
-    // Category category = repository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Category not found"));
-    // return mapToResponse(category);
-    // }
+    @Override
+    public CategoryResponse getCategoryById(Long id) {
+        Category category = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        return new CategoryResponse(
+                category.getId(),
+                category.getName(),
+                category.getDescription());
+    }
 
-    // @Override
-    // public CategoryResponse updateCategory(Long id, CategoryRequest request) {
-    // Category category = repository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Category not found"));
+    @Override
+    public CategoryResponse updateCategory(Long id, CategoryRequest request, String authHeader) {
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.getUserIdFromToken(token);
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-    // category.setName(request.getName());
-    // category.setDescription(request.getDescription());
+        Category category = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-    // Category updated = repository.save(category);
-    // return mapToResponse(updated);
-    // }
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        category.setUser(user);
 
-    // @Override
-    // public void deleteCategory(Long id) {
-    // repository.deleteById(id);
-    // }
+        Category updated = repository.save(category);
+        return new CategoryResponse(
+                updated.getId(),
+                updated.getName(),
+                updated.getDescription());
+    }
 
-    // private CategoryResponse mapToResponse(Category category) {
-    // CategoryResponse response = new CategoryResponse();
-    // response.setCategoryId(category.getCategoryId());
-    // response.setName(category.getName());
-    // response.setDescription(category.getDescription());
-    // return response;
-    // }
 }

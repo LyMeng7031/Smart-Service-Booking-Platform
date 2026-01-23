@@ -10,9 +10,8 @@ public interface CategoryService {
 
     List<CategoryResponse> getAllCategories();
 
-    // CategoryResponse getCategoryById(Long id);
+    CategoryResponse getCategoryById(Long id);
 
-    // CategoryResponse updateCategory(Long id, CategoryRequest request);
+    CategoryResponse updateCategory(Long id, CategoryRequest request, String authHeader);
 
-    // void deleteCategory(Long id);
 }

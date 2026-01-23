@@ -1,7 +1,6 @@
 package com.example.smart_service.controller;
 
 import java.util.List;
-
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequiredArgsConstructor
 @Tag(name = "Category API", description = "Category management endpoints")
 @SecurityRequirement(name = "bearerAuth")
-public class ServiceCategoryController {
+public class CategoryController {
 
     private final CategoryService service;
 
@@ -35,19 +34,18 @@ public class ServiceCategoryController {
         return service.getAllCategories();
     }
 
-    // @GetMapping("/{id}")
-    // public CategoryResponse getCategoryById(@PathVariable Long id) {
-    // return service.getCategoryById(id);
-    // }
 
-    // @PutMapping("/{id}")
-    // public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody
-    // CategoryRequest request) {
-    // return service.updateCategory(id, request);
-    // }
+    @Operation(summary = "Get category by ID", description = "Retrieves a service category by its ID")
+    @GetMapping("by-id/{id}")
+    public CategoryResponse getCategoryById(@PathVariable Long id) {
+        return service.getCategoryById(id);
+    }
 
-    // @DeleteMapping("/{id}")
-    // public void deleteCategory(@PathVariable Long id) {
-    // service.deleteCategory(id);
-    // }
+    @Operation(summary = "Update a category", description = "Updates an existing service category (Admin only)")
+    @PutMapping("/update/{id}")
+    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        return service.updateCategory(id, request, authHeader);
+    }
+
 }
