@@ -15,8 +15,6 @@ import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.security.JwtUtil;
 import com.example.smart_service.service.CategoryService;
 
-import io.micrometer.common.lang.NonNull;
-
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -78,12 +76,18 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
+    public CategoryResponse updateCategory(Long id, CategoryRequest request, String authHeader) {
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.getUserIdFromToken(token);
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Category category = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         category.setName(request.getName());
         category.setDescription(request.getDescription());
+        category.setUser(user);
 
         Category updated = repository.save(category);
         return new CategoryResponse(
@@ -92,8 +96,4 @@ public class CategoryServiceImpl implements CategoryService {
                 updated.getDescription());
     }
 
-    @Override
-    public void deleteCategory(Long id) {
-        repository.deleteById(id);
-    }
 }
