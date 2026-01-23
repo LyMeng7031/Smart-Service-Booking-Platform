@@ -1,0 +1,15 @@
+package com.example.smart_service.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import java.math.BigDecimal;
+
+@Data
+@AllArgsConstructor
+public class ServiceResponse {
+    private Long serviceId;
+    private String title;
+    private String description;
+    private BigDecimal price;
+    private String categoryName;
+}

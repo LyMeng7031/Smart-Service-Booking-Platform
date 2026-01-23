@@ -7,7 +7,6 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,7 +24,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "users")
 @Data
-public class UserEntity {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -62,4 +61,8 @@ public class UserEntity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<RoleEntity> roles = new ArrayList<>();
+
+    public String getRole() {
+        throw new UnsupportedOperationException("Unimplemented method 'getRole'");
+    }
 }

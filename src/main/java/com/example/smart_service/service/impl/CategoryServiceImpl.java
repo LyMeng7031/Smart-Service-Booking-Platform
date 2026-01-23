@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import com.example.smart_service.dto.request.CategoryRequest;
 import com.example.smart_service.dto.response.CategoryResponse;
 import com.example.smart_service.entity.Category;
-import com.example.smart_service.entity.UserEntity;
+import com.example.smart_service.entity.User;
 import com.example.smart_service.repository.CategoryRepository;
 import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.security.JwtUtil;
@@ -39,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         // 3. User Extraction
         Long userId = jwtUtil.getUserIdFromToken(token);
-        UserEntity user = userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Category category = new Category();
