@@ -12,7 +12,7 @@ import com.example.smart_service.service.CategoryService;
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
-public class ServiceCategoryController {
+public class CategoryController {
 
     private final CategoryService service;
 
@@ -27,19 +27,18 @@ public class ServiceCategoryController {
         return service.getAllCategories();
     }
 
-    // @GetMapping("/{id}")
-    // public CategoryResponse getCategoryById(@PathVariable Long id) {
-    // return service.getCategoryById(id);
-    // }
+    @GetMapping("/{id}")
+    public CategoryResponse getCategoryById(@PathVariable Long id) {
+        return service.getCategoryById(id);
+    }
 
-    // @PutMapping("/{id}")
-    // public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody
-    // CategoryRequest request) {
-    // return service.updateCategory(id, request);
-    // }
+    @PutMapping("/{id}")
+    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
+        return service.updateCategory(id, request);
+    }
 
-    // @DeleteMapping("/{id}")
-    // public void deleteCategory(@PathVariable Long id) {
-    // service.deleteCategory(id);
-    // }
+    @DeleteMapping("/{id}")
+    public void deleteCategory(@PathVariable Long id) {
+        service.deleteCategory(id);
+    }
 }
