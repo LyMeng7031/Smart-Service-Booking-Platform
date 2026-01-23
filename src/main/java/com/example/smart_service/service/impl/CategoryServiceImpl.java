@@ -15,6 +15,8 @@ import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.security.JwtUtil;
 import com.example.smart_service.service.CategoryService;
 
+import io.micrometer.common.lang.NonNull;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -65,35 +67,33 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toList());
     }
 
-    // @Override
-    // public CategoryResponse getCategoryById(Long id) {
-    // Category category = repository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Category not found"));
-    // return mapToResponse(category);
-    // }
+    @Override
+    public CategoryResponse getCategoryById(Long id) {
+        Category category = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        return new CategoryResponse(
+                category.getId(),
+                category.getName(),
+                category.getDescription());
+    }
 
-    // @Override
-    // public CategoryResponse updateCategory(Long id, CategoryRequest request) {
-    // Category category = repository.findById(id)
-    // .orElseThrow(() -> new RuntimeException("Category not found"));
+    @Override
+    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
+        Category category = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
 
-    // category.setName(request.getName());
-    // category.setDescription(request.getDescription());
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
 
-    // Category updated = repository.save(category);
-    // return mapToResponse(updated);
-    // }
+        Category updated = repository.save(category);
+        return new CategoryResponse(
+                updated.getId(),
+                updated.getName(),
+                updated.getDescription());
+    }
 
-    // @Override
-    // public void deleteCategory(Long id) {
-    // repository.deleteById(id);
-    // }
-
-    // private CategoryResponse mapToResponse(Category category) {
-    // CategoryResponse response = new CategoryResponse();
-    // response.setCategoryId(category.getCategoryId());
-    // response.setName(category.getName());
-    // response.setDescription(category.getDescription());
-    // return response;
-    // }
+    @Override
+    public void deleteCategory(Long id) {
+        repository.deleteById(id);
+    }
 }
