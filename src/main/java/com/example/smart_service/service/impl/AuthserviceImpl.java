@@ -10,6 +10,8 @@ import com.example.smart_service.dto.request.RegisterRequest;
 import com.example.smart_service.dto.response.AuthResponse;
 import com.example.smart_service.entity.RoleEntity;
 import com.example.smart_service.entity.UserEntity;
+import com.example.smart_service.exception.BadRequestException;
+import com.example.smart_service.exception.ResourceNotFoundException;
 import com.example.smart_service.repository.RoleRepository;
 import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.security.JwtUtil;
@@ -29,7 +31,7 @@ public class AuthserviceImpl implements Authservice {
         // check if username or email already exists
         if (userRepository.existsByUsername(request.getUsername())
                 || userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Username or email already exists");
+            throw new BadRequestException("Username or email already exists");
         }
 
         UserEntity user = new UserEntity();
@@ -37,11 +39,11 @@ public class AuthserviceImpl implements Authservice {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhone(request.getPhone());
-        user.setPrifileImage(request.getPrifileImage());
+        user.setPrifileImage(request.getProfileImage());
         user.setStatus(request.getStatus());
 
         RoleEntity defaultRole = roleRepository.findByName("customer")
-                .orElseThrow(() -> new IllegalArgumentException("Default role not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Default role not found"));
         List<RoleEntity> roles = new ArrayList<>();
         roles.add(defaultRole);
         user.setRoles(roles);
@@ -60,9 +62,9 @@ public class AuthserviceImpl implements Authservice {
     public AuthResponse login(LoginRequest request) {
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Wrong password");
+            throw new BadRequestException("Wrong password");
         }
 
         String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getRoles());

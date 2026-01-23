@@ -32,8 +32,10 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        boolean emailExists = userRepository.existsByEmail(email);
+        boolean usernameExists = userRepository.existsByUsername(username);
 
-        if (!userRepository.existsByEmail(email)) {
+        if (!usernameExists && !emailExists) {
 
             UserEntity admin = new UserEntity();
             admin.setUsername(username);

@@ -10,6 +10,9 @@ import com.example.smart_service.dto.request.CategoryRequest;
 import com.example.smart_service.dto.response.CategoryResponse;
 import com.example.smart_service.entity.Category;
 import com.example.smart_service.entity.UserEntity;
+import com.example.smart_service.exception.ForbidenException;
+import com.example.smart_service.exception.ResourceNotFoundException;
+import com.example.smart_service.exception.UnauthorizedException;
 import com.example.smart_service.repository.CategoryRepository;
 import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.security.JwtUtil;
@@ -27,20 +30,20 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponse createCategory(CategoryRequest request, String authHeader) {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Authorization header is missing or invalid");
+            throw new UnauthorizedException("Authorization header is missing or invalid");
         }
         String token = authHeader.substring(7);
 
-        // 2. Role Check (Check this BEFORE hitting the DB)
+        // 2. Role Check 
         List<String> roles = jwtUtil.getRolesFromToken(token);
         if (roles == null || !roles.contains("admin")) {
-            throw new RuntimeException("You are not allowed to create a category");
+            throw new ForbidenException("You are not allowed to create a category");
         }
 
         // 3. User Extraction
         Long userId = jwtUtil.getUserIdFromToken(token);
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Category category = new Category();
         category.setName(request.getName());
@@ -68,7 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponse getCategoryById(Long id) {
         Category category = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         return new CategoryResponse(
                 category.getId(),
                 category.getName(),
@@ -80,10 +83,10 @@ public class CategoryServiceImpl implements CategoryService {
         String token = authHeader.substring(7);
         Long userId = jwtUtil.getUserIdFromToken(token);
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Category category = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         category.setName(request.getName());
         category.setDescription(request.getDescription());
