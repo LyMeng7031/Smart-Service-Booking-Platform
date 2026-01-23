@@ -11,8 +11,12 @@ import lombok.RequiredArgsConstructor;
 import com.example.smart_service.dto.request.CategoryRequest;
 import com.example.smart_service.dto.response.CategoryResponse;
 import com.example.smart_service.entity.Category;
+<<<<<<< HEAD
 import com.example.smart_service.entity.UserEntity;
 import com.example.smart_service.exception.ResourceNotFoundException;
+=======
+import com.example.smart_service.entity.User;
+>>>>>>> 827e59b (Finish to create service)
 import com.example.smart_service.repository.CategoryRepository;
 import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.service.CategoryService;
@@ -30,9 +34,27 @@ public class CategoryServiceImpl implements CategoryService {
     @PreAuthorize("hasRole('admin')")
     public CategoryResponse createCategory(CategoryRequest request) {
 
+<<<<<<< HEAD
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+=======
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Authorization header is missing or invalid");
+        }
+        String token = authHeader.substring(7);
+
+        // 2. Role Check (Check this BEFORE hitting the DB)
+        List<String> roles = jwtUtil.getRolesFromToken(token);
+        if (roles == null || !roles.contains("admin")) {
+            throw new RuntimeException("You are not allowed to create a category");
+        }
+
+        // 3. User Extraction
+        Long userId = jwtUtil.getUserIdFromToken(token);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+>>>>>>> 827e59b (Finish to create service)
 
         Category category = new Category();
         category.setName(request.getName());
