@@ -2,6 +2,7 @@ package com.example.smart_service.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -27,18 +28,15 @@ public class CategoryController {
         return service.getAllCategories();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("by-id/{id}")
     public CategoryResponse getCategoryById(@PathVariable Long id) {
         return service.getCategoryById(id);
     }
 
-    @PutMapping("/{id}")
-    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
-        return service.updateCategory(id, request);
+    @PutMapping("/update/{id}")
+    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        return service.updateCategory(id, request, authHeader);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable Long id) {
-        service.deleteCategory(id);
-    }
 }
