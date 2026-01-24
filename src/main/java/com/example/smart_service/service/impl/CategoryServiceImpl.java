@@ -3,6 +3,8 @@ package com.example.smart_service.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
@@ -10,13 +12,12 @@ import com.example.smart_service.dto.request.CategoryRequest;
 import com.example.smart_service.dto.response.CategoryResponse;
 import com.example.smart_service.entity.Category;
 import com.example.smart_service.entity.UserEntity;
-import com.example.smart_service.exception.ForbidenException;
 import com.example.smart_service.exception.ResourceNotFoundException;
-import com.example.smart_service.exception.UnauthorizedException;
 import com.example.smart_service.repository.CategoryRepository;
 import com.example.smart_service.repository.UserRepository;
-import com.example.smart_service.security.JwtUtil;
 import com.example.smart_service.service.CategoryService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,24 +25,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repository;
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
     @Override
-    public CategoryResponse createCategory(CategoryRequest request, String authHeader) {
+    @PreAuthorize("hasRole('admin')")
+    public CategoryResponse createCategory(CategoryRequest request) {
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new UnauthorizedException("Authorization header is missing or invalid");
-        }
-        String token = authHeader.substring(7);
-
-        // 2. Role Check 
-        List<String> roles = jwtUtil.getRolesFromToken(token);
-        if (roles == null || !roles.contains("admin")) {
-            throw new ForbidenException("You are not allowed to create a category");
-        }
-
-        // 3. User Extraction
-        Long userId = jwtUtil.getUserIdFromToken(token);
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -79,18 +68,15 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryResponse updateCategory(Long id, CategoryRequest request, String authHeader) {
-        String token = authHeader.substring(7);
-        Long userId = jwtUtil.getUserIdFromToken(token);
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    @Transactional
+    @PreAuthorize("@catSecurityService.isOwner(#id, authentication)")
+    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
 
         Category category = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         category.setName(request.getName());
         category.setDescription(request.getDescription());
-        category.setUser(user);
 
         Category updated = repository.save(category);
         return new CategoryResponse(

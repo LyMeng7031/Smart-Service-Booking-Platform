@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.example.smart_service.entity.RoleEntity;
@@ -17,11 +18,14 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    private static final long EXPIRTION_MS = 36000000;
-    private static final String SECRET = "my-very-strong-secret-key-that-is-long-enough-123456";
+    @Value("${ACCESS_TOKEN_EXPIRATION_MS}")
+     long EXPIRTION_MS;
+    @Value("${REFRESH_TOKEN_EXPIRATION_MS}")
+     long REFRESH_EXPIRTION_MS;
+
     private final Key key;
 
-    public JwtUtil() {
+    public JwtUtil( @Value("${SECRET}") String SECRET) {
         String base64Secret = Base64.getEncoder().encodeToString(SECRET.getBytes());
         this.key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(base64Secret));
     }
@@ -51,7 +55,7 @@ public class JwtUtil {
                 .setSubject(String.valueOf(userId))
                 .claim("roles", roleNames)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRTION_MS))
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRTION_MS))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
