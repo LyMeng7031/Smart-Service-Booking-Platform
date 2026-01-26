@@ -6,12 +6,12 @@ import com.example.smart_service.dto.request.CategoryRequest;
 import com.example.smart_service.dto.response.CategoryResponse;
 
 public interface CategoryService {
-    CategoryResponse createCategory(CategoryRequest request, String authHeader);
+    CategoryResponse createCategory(CategoryRequest request);
 
     List<CategoryResponse> getAllCategories();
 
     CategoryResponse getCategoryById(Long id);
 
-    CategoryResponse updateCategory(Long id, CategoryRequest request, String authHeader);
+    CategoryResponse updateCategory(Long id, CategoryRequest request);
 
 }

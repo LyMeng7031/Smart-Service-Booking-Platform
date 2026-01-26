@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
 import com.example.smart_service.dto.request.CategoryRequest;
+import com.example.smart_service.dto.response.ApiResponse;
 import com.example.smart_service.dto.response.CategoryResponse;
 import com.example.smart_service.service.CategoryService;
 
@@ -23,29 +24,31 @@ public class CategoryController {
 
     @Operation(summary = "Create a new category", description = "Creates a new service category (Admin only)")
     @PostMapping("/create")
-    public CategoryResponse createCategory(@RequestBody CategoryRequest request,
-            @RequestHeader("Authorization") String authHeader) {
-        return service.createCategory(request, authHeader);
+    public ApiResponse<CategoryResponse> createCategory(@RequestBody CategoryRequest request) {
+        CategoryResponse response = service.createCategory(request);
+        return ApiResponse.success("Category created successfully", response);
     }
 
     @Operation(summary = "Get all categories", description = "Retrieves a list of all service categories")
-    @GetMapping("/get-all")
-    public List<CategoryResponse> getAllCategories() {
-        return service.getAllCategories();
+    @GetMapping("/get-categories")
+    public ApiResponse<List<CategoryResponse>> getAllCategories() {
+        List<CategoryResponse> responses = service.getAllCategories();
+        return ApiResponse.success("Categories retrieved successfully", responses);
     }
 
 
     @Operation(summary = "Get category by ID", description = "Retrieves a service category by its ID")
-    @GetMapping("by-id/{id}")
-    public CategoryResponse getCategoryById(@PathVariable Long id) {
-        return service.getCategoryById(id);
+    @GetMapping("/get-category/{id}")
+    public ApiResponse<CategoryResponse> getCategoryById(@PathVariable Long id) {
+        CategoryResponse response = service.getCategoryById(id);
+        return ApiResponse.success("Category retrieved successfully", response);
     }
 
     @Operation(summary = "Update a category", description = "Updates an existing service category (Admin only)")
     @PutMapping("/update/{id}")
-    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request,
-            @RequestHeader("Authorization") String authHeader) {
-        return service.updateCategory(id, request, authHeader);
+    public ApiResponse<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
+        CategoryResponse response = service.updateCategory(id, request);
+        return ApiResponse.success("Category updated successfully", response);
     }
 
 }

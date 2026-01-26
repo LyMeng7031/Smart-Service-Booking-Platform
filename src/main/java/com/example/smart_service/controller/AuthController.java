@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.smart_service.dto.request.LoginRequest;
 import com.example.smart_service.dto.request.RegisterRequest;
+import com.example.smart_service.dto.response.ApiResponse;
 import com.example.smart_service.dto.response.AuthResponse;
 import com.example.smart_service.service.Authservice;
 
@@ -25,14 +26,16 @@ public class AuthController {
 
     @Operation(summary = "Register a new user", description = "Creates a new user account")
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest request) {
-        return authservice.register(request);
+    public ApiResponse<AuthResponse> register(@RequestBody RegisterRequest request) {
+        AuthResponse response = authservice.register(request);
+        return ApiResponse.success("Registration successful", response);
     }
 
     @Operation(summary = "User login", description = "Authenticates a user and returns tokens") 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request) {
-        return authservice.login(request);
+    public ApiResponse<AuthResponse> login(@RequestBody LoginRequest request) {
+        AuthResponse response = authservice.login(request);
+        return ApiResponse.success("Login successful", response);
     }
 
 }
