@@ -9,9 +9,7 @@ import com.example.smart_service.dto.request.LoginRequest;
 import com.example.smart_service.dto.request.RegisterRequest;
 import com.example.smart_service.dto.response.AuthResponse;
 import com.example.smart_service.entity.RoleEntity;
-import com.example.smart_service.entity.UserEntity;
-import com.example.smart_service.exception.BadRequestException;
-import com.example.smart_service.exception.ResourceNotFoundException;
+import com.example.smart_service.entity.User;
 import com.example.smart_service.repository.RoleRepository;
 import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.security.JwtUtil;
@@ -34,7 +32,7 @@ public class AuthserviceImpl implements Authservice {
             throw new BadRequestException("Username or email already exists");
         }
 
-        UserEntity user = new UserEntity();
+        User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -48,7 +46,7 @@ public class AuthserviceImpl implements Authservice {
         roles.add(defaultRole);
         user.setRoles(roles);
 
-        UserEntity savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         String accessToken = jwtUtil.generateAccessToken(savedUser.getId(), savedUser.getRoles());
         String refreshToken = jwtUtil.generateRefreshToken(savedUser.getId(), savedUser.getRoles());
@@ -61,8 +59,8 @@ public class AuthserviceImpl implements Authservice {
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        UserEntity user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadRequestException("Wrong password");
         }

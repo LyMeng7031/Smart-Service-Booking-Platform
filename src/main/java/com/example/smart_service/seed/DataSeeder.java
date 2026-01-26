@@ -1,7 +1,7 @@
 package com.example.smart_service.seed;
 
 import com.example.smart_service.entity.RoleEntity;
-import com.example.smart_service.entity.UserEntity;
+import com.example.smart_service.entity.User;
 import com.example.smart_service.repository.RoleRepository;
 import com.example.smart_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class DataSeeder implements CommandLineRunner {
 
         if (!usernameExists && !emailExists) {
 
-            UserEntity admin = new UserEntity();
+            User admin = new User();
             admin.setUsername(username);
             admin.setEmail(email);
             admin.setPassword(passwordEncoder.encode(password));

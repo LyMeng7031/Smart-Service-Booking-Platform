@@ -23,7 +23,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "users")
 @Data
-public class UserEntity {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -60,4 +60,8 @@ public class UserEntity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<RoleEntity> roles = new ArrayList<>();
+
+    public String getRole() {
+        throw new UnsupportedOperationException("Unimplemented method 'getRole'");
+    }
 }

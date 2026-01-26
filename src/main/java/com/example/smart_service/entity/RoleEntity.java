@@ -29,5 +29,5 @@ public class RoleEntity {
     @ManyToMany(mappedBy = "roles")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<UserEntity> users = new ArrayList<>();
+    private List<User> users = new ArrayList<>();
 }
