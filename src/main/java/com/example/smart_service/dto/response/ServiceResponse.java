@@ -11,5 +11,8 @@ public class ServiceResponse {
     private String title;
     private String description;
     private BigDecimal price;
+    private Integer durationMinutes;
     private String categoryName;
+
+    
 }

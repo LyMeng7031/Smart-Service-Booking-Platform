@@ -5,15 +5,14 @@ import com.example.smart_service.dto.response.ServiceResponse;
 import com.example.smart_service.entity.Category;
 import com.example.smart_service.entity.ServiceEntity;
 import com.example.smart_service.entity.UserEntity;
+import com.example.smart_service.exception.ResourceNotFoundException;
 import com.example.smart_service.repository.CategoryRepository;
 import com.example.smart_service.repository.ServiceRepository;
 import com.example.smart_service.repository.UserRepository;
-import com.example.smart_service.security.JwtUtil;
 import com.example.smart_service.service.ServiceService;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
-
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -24,26 +23,14 @@ public class ServiceImpl implements ServiceService {
     private final ServiceRepository serviceRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
     @Override
-    public ServiceResponse createService(ServiceRequest request, String authHeader) {
-        // Extract user ID from JWT token
-        Long userId = jwtUtil.getUserIdFromToken(authHeader.substring(7));
+    @PreAuthorize("hasRole('provider')")
+    public ServiceResponse createService(ServiceRequest request) {
 
-        // Find user (provider)
-        UserEntity provider = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-
-        String token = authHeader.substring(7);
-
-         // Assuming your UserEntity has a "role" field as String or Enum
-        List<String> roles = jwtUtil.getRolesFromToken(token);
-
-        if (roles == null || roles.stream().noneMatch(r -> r.equalsIgnoreCase("admin") || r.equalsIgnoreCase("provider"))) {
-                throw new RuntimeException("You are not allowed to create a service");
-        }
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        UserEntity user = userRepository.findById(userId)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Find category
         Category category = categoryRepository.findById(request.getCategoryId())
@@ -55,8 +42,8 @@ public class ServiceImpl implements ServiceService {
         service.setDescription(request.getDescription());
         service.setPrice(request.getPrice());
         service.setDurationMinutes(request.getDurationMinutes());
-        service.setCategory(category);   // set the full Category object
-        service.setUser(provider);       // set the provider
+        service.setCategory(category);   
+        service.setUser(user);     
 
         // Save to database
         ServiceEntity savedService = serviceRepository.save(service);
@@ -67,7 +54,8 @@ public class ServiceImpl implements ServiceService {
                 savedService.getTitle(),
                 savedService.getDescription(),
                 savedService.getPrice(),
-                category.getName()
+                savedService.getDurationMinutes(),
+                savedService.getCategory().getName()
         );
     }
 

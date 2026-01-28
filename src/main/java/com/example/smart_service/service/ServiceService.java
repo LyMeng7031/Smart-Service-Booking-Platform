@@ -7,5 +7,5 @@ import com.example.smart_service.dto.response.ServiceResponse;
 
 @Service
 public interface ServiceService {
-    ServiceResponse createService(ServiceRequest request, String authHeader);
+    ServiceResponse createService(ServiceRequest request);
 }
