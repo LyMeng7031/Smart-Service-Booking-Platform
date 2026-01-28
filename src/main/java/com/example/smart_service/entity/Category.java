@@ -9,17 +9,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "service_categories")
+@Table(name = "categories")
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
+    @NotNull(message = "Category name is required")
+    @Column(unique = true, nullable = false)
     private String name;
 
     @Column(columnDefinition = "TEXT")
