@@ -5,12 +5,14 @@ import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.example.smart_service.dto.request.LoginRequest;
 import com.example.smart_service.dto.request.RegisterRequest;
 import com.example.smart_service.dto.response.AuthResponse;
 import com.example.smart_service.entity.RoleEntity;
 import com.example.smart_service.entity.UserEntity;
 import com.example.smart_service.exception.BadRequestException;
+import com.example.smart_service.exception.ConflictException;
 import com.example.smart_service.exception.ResourceNotFoundException;
 import com.example.smart_service.repository.RoleRepository;
 import com.example.smart_service.repository.UserRepository;
@@ -31,7 +33,7 @@ public class AuthserviceImpl implements Authservice {
         // check if username or email already exists
         if (userRepository.existsByUsername(request.getUsername())
                 || userRepository.existsByEmail(request.getEmail())) {
-            throw new BadRequestException("Username or email already exists");
+            throw new ConflictException("Username or email already exists");
         }
 
         UserEntity user = new UserEntity();
