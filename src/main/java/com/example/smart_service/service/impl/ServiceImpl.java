@@ -4,7 +4,7 @@ import com.example.smart_service.dto.request.ServiceRequest;
 import com.example.smart_service.dto.response.ServiceResponse;
 import com.example.smart_service.entity.Category;
 import com.example.smart_service.entity.ServiceEntity;
-import com.example.smart_service.entity.User;
+import com.example.smart_service.entity.UserEntity;
 import com.example.smart_service.repository.CategoryRepository;
 import com.example.smart_service.repository.ServiceRepository;
 import com.example.smart_service.repository.UserRepository;
@@ -32,7 +32,7 @@ public class ServiceImpl implements ServiceService {
         Long userId = jwtUtil.getUserIdFromToken(authHeader.substring(7));
 
         // Find user (provider)
-        User provider = userRepository.findById(userId)
+        UserEntity provider = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
 
