@@ -1,12 +1,10 @@
 package com.example.smart_service.controller;
 
 import com.example.smart_service.dto.request.ServiceRequest;
-import com.example.smart_service.dto.response.ApiResponse;
 import com.example.smart_service.dto.response.ServiceResponse;
 import com.example.smart_service.service.ServiceService;
-
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,12 +12,20 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ServiceController {
 
-    private final ServiceService service;
+    private final ServiceService serviceService;
 
-    @Operation(summary = "Create a new service", description = "Creates a new service offered by a provider")
-    @PostMapping("/create")
-    public ApiResponse<ServiceResponse> create(@RequestBody ServiceRequest req) {
-        ServiceResponse response = service.createService(req);
-        return ApiResponse.success("Service created successfully", response);
+    @PostMapping
+    public ResponseEntity<ServiceResponse> createService(@RequestBody ServiceRequest request) {
+        ServiceResponse response = serviceService.createService(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ServiceResponse> updateService(
+            @PathVariable("id") Long serviceId,
+            @RequestBody ServiceRequest request
+    ) {
+        ServiceResponse response = serviceService.updateService(serviceId, request);
+        return ResponseEntity.ok(response);
     }
 }

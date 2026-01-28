@@ -15,7 +15,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @RequiredArgsConstructor
 public class ServiceImpl implements ServiceService {
@@ -24,31 +23,27 @@ public class ServiceImpl implements ServiceService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
+    //create service//
     @Override
     @PreAuthorize("hasRole('provider')")
     public ServiceResponse createService(ServiceRequest request) {
-
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         UserEntity user = userRepository.findById(userId)
-                        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Find category
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        // 4️ Create new service entity
         ServiceEntity service = new ServiceEntity();
         service.setTitle(request.getTitle());
         service.setDescription(request.getDescription());
         service.setPrice(request.getPrice());
         service.setDurationMinutes(request.getDurationMinutes());
-        service.setCategory(category);   
-        service.setUser(user);     
+        service.setCategory(category);
+        service.setUser(user);
 
-        // Save to database
         ServiceEntity savedService = serviceRepository.save(service);
 
-        // Map to response
         return new ServiceResponse(
                 savedService.getServiceId(),
                 savedService.getTitle(),
@@ -59,4 +54,38 @@ public class ServiceImpl implements ServiceService {
         );
     }
 
+    //update service//
+    @Override
+    @PreAuthorize("hasRole('provider')")
+    public ServiceResponse updateService(Long serviceId, ServiceRequest request) {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        ServiceEntity service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
+
+        if (!service.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You are not allowed to update this service");
+        }
+
+        service.setTitle(request.getTitle());
+        service.setDescription(request.getDescription());
+        service.setPrice(request.getPrice());
+        service.setDurationMinutes(request.getDurationMinutes());
+
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            service.setCategory(category);
+        }
+
+        ServiceEntity updatedService = serviceRepository.save(service);
+
+        return new ServiceResponse(
+                updatedService.getServiceId(),
+                updatedService.getTitle(),
+                updatedService.getDescription(),
+                updatedService.getPrice(),
+                updatedService.getDurationMinutes(),
+                updatedService.getCategory().getName()
+        );
+    }
 }
