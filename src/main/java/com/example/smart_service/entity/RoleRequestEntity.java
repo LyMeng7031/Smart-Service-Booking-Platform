@@ -9,16 +9,16 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Data
 @Table(name = "role_requests")
-public class RoleRequest {
+public class RoleRequestEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; 
+    private UserEntity user;
 
-    @Column( nullable = false)
+    @Column(nullable = false)
     private String status = "PENDING";
 
     @Column(name = "business_name")
@@ -26,7 +26,7 @@ public class RoleRequest {
 
     @Column(name = "business_bio")
     private String businessBio;
-    
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

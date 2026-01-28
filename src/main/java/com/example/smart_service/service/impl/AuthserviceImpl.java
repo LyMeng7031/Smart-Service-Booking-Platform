@@ -10,6 +10,8 @@ import com.example.smart_service.dto.request.RegisterRequest;
 import com.example.smart_service.dto.response.AuthResponse;
 import com.example.smart_service.entity.RoleEntity;
 import com.example.smart_service.entity.User;
+import com.example.smart_service.exception.BadRequestException;
+import com.example.smart_service.exception.ResourceNotFoundException;
 import com.example.smart_service.repository.RoleRepository;
 import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.security.JwtUtil;
