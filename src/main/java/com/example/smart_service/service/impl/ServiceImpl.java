@@ -11,6 +11,10 @@ import com.example.smart_service.repository.ServiceRepository;
 import com.example.smart_service.repository.UserRepository;
 import com.example.smart_service.service.ServiceService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -88,4 +92,19 @@ public class ServiceImpl implements ServiceService {
                 updatedService.getCategory().getName()
         );
     }
+
+    //get all services//
+    @Override
+    public List<ServiceResponse> getAllServices() {
+        return serviceRepository.findAll().stream().map(service -> new ServiceResponse(
+                service.getServiceId(),
+                service.getTitle(),
+                service.getDescription(),
+                service.getPrice(),
+                service.getDurationMinutes(),
+                service.getCategory().getName()
+        )).collect(Collectors.toList());
+    }
+
+    
 }
