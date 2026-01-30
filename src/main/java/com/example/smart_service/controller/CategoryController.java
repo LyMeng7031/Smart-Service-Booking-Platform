@@ -22,7 +22,7 @@ public class CategoryController {
 
     private final CategoryService service;
 
-    // ✅ CREATE Category
+    // CREATE Category
     @Operation(summary = "Create a new category", description = "Creates a new service category (Admin only)")
     @PostMapping
     public ApiResponse<CategoryResponse> createCategory(@RequestBody CategoryRequest request) {
@@ -30,7 +30,7 @@ public class CategoryController {
         return ApiResponse.success("Category created successfully", response);
     }
 
-    // ✅ GET ALL Categories
+    // GET ALL Categories
     @Operation(summary = "Get all categories", description = "Retrieves a list of all service categories")
     @GetMapping
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
@@ -38,7 +38,7 @@ public class CategoryController {
         return ApiResponse.success("Categories retrieved successfully", responses);
     }
 
-    // ✅ GET Category By ID
+    // GET Category By ID
     @Operation(summary = "Get category by ID", description = "Retrieves a service category by its ID")
     @GetMapping("/{id}")
     public ApiResponse<CategoryResponse> getCategoryById(@PathVariable Long id) {
@@ -46,7 +46,7 @@ public class CategoryController {
         return ApiResponse.success("Category retrieved successfully", response);
     }
 
-    // ✅ UPDATE Category
+    // UPDATE Category
     @Operation(summary = "Update a category", description = "Updates an existing service category (Admin only)")
     @PutMapping("/{id}")
     public ApiResponse<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
@@ -54,7 +54,7 @@ public class CategoryController {
         return ApiResponse.success("Category updated successfully", response);
     }
 
-    // ✅ DELETE Category
+    // DELETE Category
     @Operation(summary = "Delete a category", description = "Deletes a service category by ID (Admin only)")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteCategory(@PathVariable Long id) {
