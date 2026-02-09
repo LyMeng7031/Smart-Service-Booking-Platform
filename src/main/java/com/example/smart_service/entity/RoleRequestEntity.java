@@ -24,9 +24,9 @@ public class RoleRequestEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user; 
+    private UserEntity user;
 
-    @Column( nullable = false)
+    @Column(nullable = false)
     private String status = "PENDING";
 
     @Column(name = "business_name")
@@ -34,7 +34,7 @@ public class RoleRequestEntity {
 
     @Column(name = "business_bio")
     private String businessBio;
-    
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

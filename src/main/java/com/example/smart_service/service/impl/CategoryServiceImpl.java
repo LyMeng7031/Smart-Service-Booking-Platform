@@ -7,10 +7,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
+import com.example.smart_service.entity.UserEntity;
 import com.example.smart_service.dto.request.CategoryRequest;
 import com.example.smart_service.dto.response.CategoryResponse;
 import com.example.smart_service.entity.Category;
-import com.example.smart_service.entity.UserEntity;
 import com.example.smart_service.exception.ConflictException;
 import com.example.smart_service.exception.ResourceNotFoundException;
 import com.example.smart_service.repository.CategoryRepository;

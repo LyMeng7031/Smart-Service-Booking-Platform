@@ -23,88 +23,84 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ServiceImpl implements ServiceService {
 
-    private final ServiceRepository serviceRepository;
-    private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+        private final ServiceRepository serviceRepository;
+        private final CategoryRepository categoryRepository;
+        private final UserRepository userRepository;
 
-    //create service//
-    @Override
-    @PreAuthorize("hasRole('provider')")
-    public ServiceResponse createService(ServiceRequest request) {
-        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        // create service//
+        @Override
+        @PreAuthorize("hasRole('provider')")
+        public ServiceResponse createService(ServiceRequest request) {
+                Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+                UserEntity user = userRepository.findById(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                Category category = categoryRepository.findById(request.getCategoryId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        ServiceEntity service = new ServiceEntity();
-        service.setTitle(request.getTitle());
-        service.setDescription(request.getDescription());
-        service.setPrice(request.getPrice());
-        service.setDurationMinutes(request.getDurationMinutes());
-        service.setCategory(category);
-        service.setUser(user);
+                ServiceEntity service = new ServiceEntity();
+                service.setTitle(request.getTitle());
+                service.setDescription(request.getDescription());
+                service.setPrice(request.getPrice());
+                service.setDurationMinutes(request.getDurationMinutes());
+                service.setCategory(category);
+                service.setUser(user);
 
-        ServiceEntity savedService = serviceRepository.save(service);
+                ServiceEntity savedService = serviceRepository.save(service);
 
-        return new ServiceResponse(
-                savedService.getServiceId(),
-                savedService.getTitle(),
-                savedService.getDescription(),
-                savedService.getPrice(),
-                savedService.getDurationMinutes(),
-                savedService.getCategory().getName()
-        );
-    }
-
-    //update service//
-    @Override
-    @PreAuthorize("hasRole('provider')")
-    public ServiceResponse updateService(Long serviceId, ServiceRequest request) {
-        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        ServiceEntity service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
-
-        if (!service.getUser().getId().equals(userId)) {
-            throw new RuntimeException("You are not allowed to update this service");
+                return new ServiceResponse(
+                                savedService.getServiceId(),
+                                savedService.getTitle(),
+                                savedService.getDescription(),
+                                savedService.getPrice(),
+                                savedService.getDurationMinutes(),
+                                savedService.getCategory().getName());
         }
 
-        service.setTitle(request.getTitle());
-        service.setDescription(request.getDescription());
-        service.setPrice(request.getPrice());
-        service.setDurationMinutes(request.getDurationMinutes());
+        // update service//
+        @Override
+        @PreAuthorize("hasRole('provider')")
+        public ServiceResponse updateService(Long serviceId, ServiceRequest request) {
+                Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+                ServiceEntity service = serviceRepository.findById(serviceId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
-        if (request.getCategoryId() != null) {
-            Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-            service.setCategory(category);
+                if (!service.getUser().getId().equals(userId)) {
+                        throw new RuntimeException("You are not allowed to update this service");
+                }
+
+                service.setTitle(request.getTitle());
+                service.setDescription(request.getDescription());
+                service.setPrice(request.getPrice());
+                service.setDurationMinutes(request.getDurationMinutes());
+
+                if (request.getCategoryId() != null) {
+                        Category category = categoryRepository.findById(request.getCategoryId())
+                                        .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                        service.setCategory(category);
+                }
+
+                ServiceEntity updatedService = serviceRepository.save(service);
+
+                return new ServiceResponse(
+                                updatedService.getServiceId(),
+                                updatedService.getTitle(),
+                                updatedService.getDescription(),
+                                updatedService.getPrice(),
+                                updatedService.getDurationMinutes(),
+                                updatedService.getCategory().getName());
         }
 
-        ServiceEntity updatedService = serviceRepository.save(service);
+        // get all services//
+        @Override
+        public List<ServiceResponse> getAllServices() {
+                return serviceRepository.findAll().stream().map(service -> new ServiceResponse(
+                                service.getServiceId(),
+                                service.getTitle(),
+                                service.getDescription(),
+                                service.getPrice(),
+                                service.getDurationMinutes(),
+                                service.getCategory().getName())).collect(Collectors.toList());
+        }
 
-        return new ServiceResponse(
-                updatedService.getServiceId(),
-                updatedService.getTitle(),
-                updatedService.getDescription(),
-                updatedService.getPrice(),
-                updatedService.getDurationMinutes(),
-                updatedService.getCategory().getName()
-        );
-    }
-
-    //get all services//
-    @Override
-    public List<ServiceResponse> getAllServices() {
-        return serviceRepository.findAll().stream().map(service -> new ServiceResponse(
-                service.getServiceId(),
-                service.getTitle(),
-                service.getDescription(),
-                service.getPrice(),
-                service.getDurationMinutes(),
-                service.getCategory().getName()
-        )).collect(Collectors.toList());
-    }
-
-    
 }

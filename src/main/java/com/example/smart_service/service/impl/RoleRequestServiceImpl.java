@@ -25,155 +25,161 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RoleRequestServiceImpl implements RoleRequestService {
 
-    private final RoleRequestRepository requestRepo;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-
-   @Override
-   @PreAuthorize("hasRole('customer')")
-    public RoleResponse createRequest(RoleRequest request) {
-        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        if (requestRepo.existsByUserId(userId)) {
-                throw new BadRequestException("You have already requested");
-        }
-
-        if(user.getRoles().stream().anyMatch(role -> role.getName().equals("provider"))) {
-                throw new BadRequestException("You are already a provider");
-        }
-
-        RoleRequestEntity roleRequest = new RoleRequestEntity();
-        roleRequest.setBusinessName(request.getBusinessName());
-        roleRequest.setBusinessBio(request.getBusinessBio());
-        roleRequest.setUser(user);
-
-        RoleRequestEntity savedRequest = requestRepo.save(roleRequest);
-
-        AuthResponse userResponse = new AuthResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getPhone(),
-                user.getPrifileImage(),
-                user.getStatus(),
-                null,
-                null
-        );
-
-        return new RoleResponse(
-                savedRequest.getId(),
-                savedRequest.getBusinessName(),
-                savedRequest.getBusinessBio(),
-                savedRequest.getStatus(),
-                userResponse
-        );
-    }
+        private final RoleRequestRepository requestRepo;
+        private final UserRepository userRepository;
+        private final RoleRepository roleRepository;
 
     @Override
-    @PreAuthorize("hasRole('admin')")
-    public List<RoleResponse> getAllRequests() {
-        return requestRepo.findAll().stream()
-                .map(request -> {
-                    AuthResponse userResponse = new AuthResponse(
-                            request.getUser().getId(),
-                            request.getUser().getUsername(),
-                            request.getUser().getEmail(),
-                            request.getUser().getPassword(),
-                            request.getUser().getPhone(),
-                            request.getUser().getPrifileImage(),
-                            request.getUser().getStatus(),
-                            null,
-                            null
-                    );
+    public RoleResponse createRequest(com.example.smart_service.dto.request.RoleRequest dto, String authHeader) {
+        System.out.println("Received Header: " + authHeader); // Add this line to debug
 
-                    return new RoleResponse(
-                            request.getId(),
-                            request.getBusinessName(),
-                            request.getBusinessBio(),
-                            request.getStatus(),
-                            userResponse
-                    );
-                })
-                .toList();
-    }
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Invalid Authorization header");
+        }
+        // ... rest of code
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.getUserIdFromToken(token);
 
-    @Override
-    @PreAuthorize("hasRole('admin')")
-    public RoleResponse approve(Long requestId) {
+        // 2. Find User
+        UserEntity userEntity = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        RoleRequestEntity request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
-        
-        if(request.getStatus().equals("approved") || request.getStatus().equals("rejected")) {
-            throw new BadRequestException("Request is already processed");
+        @Override
+        @PreAuthorize("hasRole('customer')")
+        public RoleResponse createRequest(RoleRequest request) {
+                Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+                UserEntity user = userRepository.findById(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+                if (requestRepo.existsByUserId(userId)) {
+                        throw new BadRequestException("You have already requested");
+                }
+                if (user.getRoles().stream().anyMatch(role -> role.getName().equals("provider"))) {
+                        throw new BadRequestException("You are already a provider");
+                }
+
+                RoleRequestEntity roleRequest = new RoleRequestEntity();
+                roleRequest.setBusinessName(request.getBusinessName());
+                roleRequest.setBusinessBio(request.getBusinessBio());
+                roleRequest.setUser(user);
+
+                RoleRequestEntity savedRequest = requestRepo.save(roleRequest);
+
+                AuthResponse userResponse = new AuthResponse(
+                                user.getId(),
+                                user.getUsername(),
+                                user.getEmail(),
+                                user.getPassword(),
+                                user.getPhone(),
+                                user.getPrifileImage(),
+                                user.getStatus(),
+                                null,
+                                null);
+
+                return new RoleResponse(
+                                savedRequest.getId(),
+                                savedRequest.getBusinessName(),
+                                savedRequest.getBusinessBio(),
+                                savedRequest.getStatus(),
+                                userResponse);
         }
 
-        request.setStatus("approved");
+        @Override
+        @PreAuthorize("hasRole('admin')")
+        public List<RoleResponse> getAllRequests() {
+                return requestRepo.findAll().stream()
+                                .map(request -> {
+                                        AuthResponse userResponse = new AuthResponse(
+                                                        request.getUser().getId(),
+                                                        request.getUser().getUsername(),
+                                                        request.getUser().getEmail(),
+                                                        request.getUser().getPassword(),
+                                                        request.getUser().getPhone(),
+                                                        request.getUser().getPrifileImage(),
+                                                        request.getUser().getStatus(),
+                                                        null,
+                                                        null);
 
-        RoleEntity defaultRole = roleRepository.findByName("provider")
-                .orElseThrow(() -> new ResourceNotFoundException("Default role not found"));
-        UserEntity user = request.getUser();
-        List<RoleEntity> updatedRoles = new ArrayList<>(user.getRoles());
-        updatedRoles.add(defaultRole);
-        user.setRoles(updatedRoles);
-        userRepository.save(user);
-        
-        requestRepo.save(request);
-
-        AuthResponse userResponse = new AuthResponse(
-                request.getUser().getId(),
-                request.getUser().getUsername(),
-                request.getUser().getEmail(),
-                request.getUser().getPassword(),
-                request.getUser().getPhone(),
-                request.getUser().getPrifileImage(),
-                request.getUser().getStatus(),
-                null,
-                null
-        );
-
-        return new RoleResponse(
-                request.getId(),
-                request.getBusinessName(),
-                request.getBusinessBio(),
-                "approved",
-                userResponse
-        );
-    }
-
-    @Override
-    @PreAuthorize("hasRole('admin')")
-    public RoleResponse reject(Long requestId) {
-
-        RoleRequestEntity request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
-        if(request.getStatus().equals("approved") || request.getStatus().equals("rejected")) {
-            throw new BadRequestException("Request is already processed");
+                                        return new RoleResponse(
+                                                        request.getId(),
+                                                        request.getBusinessName(),
+                                                        request.getBusinessBio(),
+                                                        request.getStatus(),
+                                                        userResponse);
+                                })
+                                .toList();
         }
-            request.setStatus("rejected");
-            requestRepo.save(request);
 
-            AuthResponse userResponse = new AuthResponse(
-                    request.getUser().getId(),
-                    request.getUser().getUsername(),
-                    request.getUser().getEmail(),
-                    request.getUser().getPassword(),
-                    request.getUser().getPhone(),
-                    request.getUser().getPrifileImage(),
-                    request.getUser().getStatus(),
-                    null,
-                    null
-            );
+        @Override
+        @PreAuthorize("hasRole('admin')")
+        public RoleResponse approve(Long requestId) {
 
-            return new RoleResponse(
-                    request.getId(),
-                    request.getBusinessName(),
-                    request.getBusinessBio(),
-                    "rejected",
-                    userResponse
-            );
-    }
+                RoleRequestEntity request = requestRepo.findById(requestId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
+
+                if (request.getStatus().equals("approved") || request.getStatus().equals("rejected")) {
+                        throw new BadRequestException("Request is already processed");
+                }
+
+                request.setStatus("approved");
+
+                RoleEntity defaultRole = roleRepository.findByName("provider")
+                                .orElseThrow(() -> new ResourceNotFoundException("Default role not found"));
+                UserEntity user = request.getUser();
+                List<RoleEntity> updatedRoles = new ArrayList<>(user.getRoles());
+                updatedRoles.add(defaultRole);
+                user.setRoles(updatedRoles);
+                userRepository.save(user);
+
+                requestRepo.save(request);
+
+                AuthResponse userResponse = new AuthResponse(
+                                request.getUser().getId(),
+                                request.getUser().getUsername(),
+                                request.getUser().getEmail(),
+                                request.getUser().getPassword(),
+                                request.getUser().getPhone(),
+                                request.getUser().getPrifileImage(),
+                                request.getUser().getStatus(),
+                                null,
+                                null);
+
+                return new RoleResponse(
+                                request.getId(),
+                                request.getBusinessName(),
+                                request.getBusinessBio(),
+                                "approved",
+                                userResponse);
+        }
+
+        @Override
+        @PreAuthorize("hasRole('admin')")
+        public RoleResponse reject(Long requestId) {
+
+                RoleRequestEntity request = requestRepo.findById(requestId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
+                if (request.getStatus().equals("approved") || request.getStatus().equals("rejected")) {
+                        throw new BadRequestException("Request is already processed");
+                }
+                request.setStatus("rejected");
+                requestRepo.save(request);
+
+                AuthResponse userResponse = new AuthResponse(
+                                request.getUser().getId(),
+                                request.getUser().getUsername(),
+                                request.getUser().getEmail(),
+                                request.getUser().getPassword(),
+                                request.getUser().getPhone(),
+                                request.getUser().getPrifileImage(),
+                                request.getUser().getStatus(),
+                                null,
+                                null);
+
+                return new RoleResponse(
+                                request.getId(),
+                                request.getBusinessName(),
+                                request.getBusinessBio(),
+                                "rejected",
+                                userResponse);
+        }
 }
