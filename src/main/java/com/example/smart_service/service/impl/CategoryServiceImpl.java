@@ -2,7 +2,6 @@ package com.example.smart_service.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -12,6 +11,7 @@ import com.example.smart_service.entity.UserEntity;
 import com.example.smart_service.dto.request.CategoryRequest;
 import com.example.smart_service.dto.response.CategoryResponse;
 import com.example.smart_service.entity.Category;
+import com.example.smart_service.exception.ConflictException;
 import com.example.smart_service.exception.ResourceNotFoundException;
 import com.example.smart_service.repository.CategoryRepository;
 import com.example.smart_service.repository.UserRepository;
@@ -25,6 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         private final CategoryRepository repository;
         private final UserRepository userRepository;
+        private final CategoryRepository categoryRepository;
 
         @Override
         @PreAuthorize("hasRole('admin')")
@@ -34,6 +35,10 @@ public class CategoryServiceImpl implements CategoryService {
                 UserEntity user = userRepository.findById(userId)
                                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+                repository.findByName(request.getName())
+                                .ifPresent(c -> {
+                                        throw new ConflictException("Category already exists");
+                                });
                 Category category = new Category();
                 category.setName(request.getName());
                 category.setDescription(request.getDescription());
@@ -85,4 +90,11 @@ public class CategoryServiceImpl implements CategoryService {
                                 updated.getDescription());
         }
 
+        @Override
+        public void deleteCategory(Long id) {
+                var category = categoryRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+
+                categoryRepository.delete(category);
+        }
 }

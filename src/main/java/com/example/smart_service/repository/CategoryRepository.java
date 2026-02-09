@@ -9,6 +9,5 @@ import com.example.smart_service.entity.Category;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    Optional<Category> findByIdAndUserId(Long id, Long userId);
-
+    Optional<Category> findByName(String name);
 }

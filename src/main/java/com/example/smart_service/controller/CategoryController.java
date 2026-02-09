@@ -22,33 +22,44 @@ public class CategoryController {
 
     private final CategoryService service;
 
+    // CREATE Category
     @Operation(summary = "Create a new category", description = "Creates a new service category (Admin only)")
-    @PostMapping("/create")
+    @PostMapping
     public ApiResponse<CategoryResponse> createCategory(@RequestBody CategoryRequest request) {
         CategoryResponse response = service.createCategory(request);
         return ApiResponse.success("Category created successfully", response);
     }
 
+    // GET ALL Categories
     @Operation(summary = "Get all categories", description = "Retrieves a list of all service categories")
-    @GetMapping("/get-categories")
+    @GetMapping
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         List<CategoryResponse> responses = service.getAllCategories();
         return ApiResponse.success("Categories retrieved successfully", responses);
     }
 
-
+    // GET Category By ID
     @Operation(summary = "Get category by ID", description = "Retrieves a service category by its ID")
-    @GetMapping("/get-category/{id}")
+    @GetMapping("/{id}")
     public ApiResponse<CategoryResponse> getCategoryById(@PathVariable Long id) {
         CategoryResponse response = service.getCategoryById(id);
         return ApiResponse.success("Category retrieved successfully", response);
     }
 
+    // UPDATE Category
     @Operation(summary = "Update a category", description = "Updates an existing service category (Admin only)")
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ApiResponse<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
         CategoryResponse response = service.updateCategory(id, request);
         return ApiResponse.success("Category updated successfully", response);
+    }
+
+    // DELETE Category
+    @Operation(summary = "Delete a category", description = "Deletes a service category by ID (Admin only)")
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteCategory(@PathVariable Long id) {
+        service.deleteCategory(id);
+        return ApiResponse.success("Category deleted successfully", null);
     }
 
 }
